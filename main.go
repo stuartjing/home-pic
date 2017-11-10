@@ -1,7 +1,7 @@
 package main
 
 import (
-	_ "wechatmanager/routers"
+	_ "home-pic/routers"
 
 	"github.com/astaxie/beego"
 )
