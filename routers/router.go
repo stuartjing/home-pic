@@ -18,5 +18,8 @@ func init() {
 
 	//picmanager
 	beego.Router("/picmanager/init/list", &picmanager.InitController{}, "*:List")
-
+	beego.Router("/picmanager/init/upload", &picmanager.InitController{}, "*:Upload")
+	beego.Router("/picmanager/init/preview", &picmanager.InitController{}, "*:Preview")
+	beego.Router("/picmanager/init/showupload", &picmanager.InitController{}, "*:ShowUpload")
+	beego.Router("/picmanager/init/save", &picmanager.InitController{}, "*:Save")
 }
