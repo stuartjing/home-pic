@@ -9,13 +9,15 @@ import (
 	"github.com/qiniu/api.v7/storage"
 )
 
-var localFile string = "/Users/stuartjing/a.jpeg"
+//var localFile string = "/Users/stuartjing/a.jpeg"
 var bucket string = "stuartjing"
-var key string = "github-x.png"
+
+//var key string = "github-x.png"
 var accessKey string = "Hp0XfssJWGVk0csIzWEE3Pu6m_g1NO6x3KRMPYhA"
 var secretKey string = "F-tcgPs7REDHkm9DUwLdpUgcl9xw3qJnu9iVgbvT"
 
-func UPloadFile() {
+func UPloadFile(localFile, key string) string {
+
 	putPolicy := storage.PutPolicy{
 		Scope: bucket,
 	}
@@ -40,7 +42,8 @@ func UPloadFile() {
 	err := formUploader.PutFile(context.Background(), &ret, upToken, key, localFile, &putExtra)
 	if err != nil {
 		fmt.Println(err)
-		return
+		return ""
 	}
 	fmt.Println(ret.Key, ret.Hash)
+	return ret.Hash
 }

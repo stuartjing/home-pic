@@ -11,6 +11,10 @@ import (
 	"os"
 	"path"
 	//	"strconv"
+	"errors"
+	"os/exec"
+	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/astaxie/beego"
@@ -40,7 +44,7 @@ func (c *InitController) List() {
 
 func (c *InitController) Upload() {
 	//接收上传的图片和描述  描述存在本地 图片本地不保留上传到七牛云上
-	qiniu.UPloadFile()
+	//	qiniu.UPloadFile()
 	c.TplName = "easyui/picmanager/listok.tpl"
 
 }
@@ -48,12 +52,25 @@ func (c *InitController) Upload() {
 func (c *InitController) Save() {
 
 	//接收上传的图片和描述  描述存在本地数据库  图片本地不保留上传到七牛云上 上传到七牛云成功后 讲返回的数据一起 保存到db中。配置好好域名，再做个图片列表页
-	//qiniu.UPloadFile()
+	//	qiniu.UPloadFile()
 
+	var pathstr string
+	var name string
+	var LocalP, qiniuimg string
+
+	LocalP, _ = getCurrentPath()
 	pic := c.GetStrings("pic[]")
 
 	for i := 0; i < len(pic); i++ {
-		SaveImageDB("name", pic[i], "描述图片，信息")
+
+		pathstr = LocalP + pic[i]
+
+		name = path.Base(pathstr)
+
+		qiniuimg = qiniu.UPloadFile(pathstr, name)
+
+		SaveImageDB("name", pic[i], qiniuimg, "描述图片，信息")
+
 	}
 
 	fmt.Println("-------------", pic)
@@ -265,15 +282,35 @@ func SaveImage(path string, img image.Image) (err error) {
 	return
 }
 
-func SaveImageDB(name, pathinfo, des string) {
+func SaveImageDB(name, pathinfo, qiniuimg, des string) {
 
 	image := new(models.Images)
 
 	image.Pathinfo = pathinfo
 	image.Name = name
 	image.Description = des
+	image.Qiniuimg = qiniuimg
 
 	a, err := models.AddImage(image)
 
 	fmt.Println(a, err)
+}
+
+func getCurrentPath() (string, error) {
+	file, err := exec.LookPath(os.Args[0])
+	if err != nil {
+		return "", err
+	}
+	path, err := filepath.Abs(file)
+	if err != nil {
+		return "", err
+	}
+	i := strings.LastIndex(path, "/")
+	if i < 0 {
+		i = strings.LastIndex(path, "\\")
+	}
+	if i < 0 {
+		return "", errors.New(`error: Can't find "/" or "\".`)
+	}
+	return string(path[0 : i+1]), nil
 }
